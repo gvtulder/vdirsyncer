@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import re
 import urllib.parse as urlparse
 import xml.etree.ElementTree as etree
 
@@ -489,6 +490,11 @@ class DAVStorage(Storage):
                 raw = raw.decode(response.encoding)
             if isinstance(etag, bytes):
                 etag = etag.decode(response.encoding)
+
+            # modification for BIGR calendar sync:
+            # remove ATTENDEE and ORGANIZER lines to prevent
+            # Google Calendar from inviting everyone again
+            raw = re.sub(r'^(ATTENDEE|ORGANIZER)[:;].+(?:\n|\r\n?)( .+(?:\n|\r\n?))*', '', raw, flags=re.MULTILINE)
 
             try:
                 hrefs_left.remove(href)
